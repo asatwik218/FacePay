@@ -9,14 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-rekognition": "^3.377.0",
+    "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-slot": "^1.0.2",
     "@types/node": "20.4.4",
     "@types/react": "18.2.16",
     "@types/react-dom": "18.2.7",
     "autoprefixer": "10.4.14",
+    "aws-crt": "^1.15.22",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "encoding": "^0.1.13",
+    "face-api.js": "^0.22.2",
     "firebase": "^10.1.0",
     "lucide-react": "^0.263.1",
     "next": "13.4.12",
@@ -25,9 +29,11 @@
     "react-dom": "18.2.0",
     "react-otp-input": "^3.0.4",
     "react-phone-number-input": "^3.3.0",
+    "react-webcam": "^7.1.1",
     "tailwind-merge": "^1.14.0",
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.6",
-    "typescript": "5.1.6"
+    "typescript": "5.1.6",
+    "zustand": "^4.3.9"
   }
 }
