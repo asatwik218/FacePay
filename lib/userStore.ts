@@ -3,29 +3,29 @@ import { create } from "zustand";
 const initialState = {
 	name: "",
 	phoneNumber: "",
-	externalID: "",
+	externalImgId: "",
 	upiID: "",
 };
 
-export type UserType = {  
+export type UserType = {
 	name: string;
 	phoneNumber: string;
-	externalID: string;
+	externalImgId: string;
 	upiID: string;
 };
 
 type UserStoreType = {
-  user: UserType;
-  setUser: (userDetails: UserType) => void;
-	reset:()=>void;
+	user: UserType;
+	setUser: (userDetails: UserType) => void;
+	reset: () => void;
 };
 
 export const useUserStore = create<UserStoreType>((set) => ({
-	user:initialState,
+	user: initialState,
 	setUser: (userDetails: UserType) => {
-    set(()=>({user:{...userDetails}}));
-  },
+		set(() => ({ user: { ...userDetails } }));
+	},
 	reset: () => {
-		set(()=>({user:initialState}));
+		set(() => ({ user: initialState }));
 	},
 }));

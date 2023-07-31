@@ -5,9 +5,10 @@ import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input/input";
 import OtpInput from "react-otp-input";
 
 import { Button } from "@/components/ui/button";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { UserType, useUserStore } from "@/lib/userStore";
 import { useRouter } from "next/navigation";
+import { collection, query, where } from "firebase/firestore";
 
 function PhoneAuth() {
 	const [phoneNumber, setPhoneNumber] = useState<string>();
@@ -49,19 +50,16 @@ function PhoneAuth() {
 		router.replace("/signup/2");
 	};
 
-	//what to do on login/existing user
-	const onLogin = () => {
-		//fetch user from firebase
-		//set user in global state
-	};
-
 	const verifyOtp = async () => {
 		setIsLoading(true);
 		try {
 			//confirm otp
 			const res = await window.confirmationResult.confirm(otp);
+			const phNo = res.user.phoneNumber;
+			
+
+
 			onSignup(res.user.phoneNumber!);
-			// onLogin();;
 		} catch (error: any) {
 			console.log("error in verifying otp", error);
 			setError(error.message);

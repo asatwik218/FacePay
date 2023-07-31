@@ -2,16 +2,21 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import * as faceapi from "face-api.js";
 import Webcam from "react-webcam";
+import { useUserStore } from "@/lib/userStore";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 
 type Props = {
 	operation: "signup" | "pay";
-	name: string;
-	phoneNumber: string;
 };
 
-const Camera = ({ operation, name, phoneNumber }: Props) => {
+const Camera = ({ operation }: Props) => {
 	const camRef = useRef<Webcam>(null);
 	const imgRef = useRef<HTMLImageElement>(null);
+	const router = useRouter();
+
+	const { user, setUser } = useUserStore();
 
 	const [error, setError] = useState("");
 
@@ -19,41 +24,22 @@ const Camera = ({ operation, name, phoneNumber }: Props) => {
 		await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
 	};
 
-	const searchFace = async () => {
-		setError("");
-		const imageSrc = imgRef.current?.src;
-		const imgBase64 = imageSrc?.replace("data:image/jpeg;base64,", "");
-
-		try {
-			const res = await fetch("/api/face/search", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ collectionID: "testing-aws", imgBase64 }),
-			});
-			const data = await res.json();
-			console.log(data);
-		} catch (error: any) {
-			setError(error.message);
-			console.error(error);
-		}
-	};
-
 	const handleSignup = async () => {
 		try {
 			const imageSrc = imgRef.current?.src;
 			const imgBase64 = imageSrc?.replace("data:image/jpeg;base64,", "");
 
-			const initials = name
+			const initials = user.name
 				.split(" ")
 				.map((word) => word[0])
 				.join("");
 			//external Img id = initials + phoneNumber
-			const externalImgId = `${initials}-${phoneNumber}`;
-			const collectionID = process.env.NEXT_PUBLIC_AWS_COLLECTION_ID;
-			console.log(externalImgId, initials);
+			const externalImgId = `${initials}-${user.phoneNumber.substring(3)}`;
+			setUser({ ...user, externalImgId });
 
+			const collectionID = process.env.NEXT_PUBLIC_AWS_COLLECTION_ID;
+
+			//send https req to add face to aws collection
 			const res = await fetch("/api/face/index", {
 				method: "POST",
 				headers: {
@@ -65,16 +51,21 @@ const Camera = ({ operation, name, phoneNumber }: Props) => {
 					imgBase64,
 				}),
 			});
-
 			const response = await res.json();
+
 			console.log(response);
+
 			if (response.success == true) {
-
 				//save user data to db
-
+				const doc = await addDoc(collection(db, "users"), {
+					...user,
+					externalImgId,
+				});
+				console.log(doc);
 				//redirect to main page
-
+				router.push("/");
 			} else {
+				setError(response.error);
 			}
 		} catch (error: any) {
 			console.log("handle signup error", error.message);
@@ -83,19 +74,30 @@ const Camera = ({ operation, name, phoneNumber }: Props) => {
 
 	const handlePayment = async () => {
 		setError("");
-		const imageSrc = imgRef.current?.src;
-		const imgBase64 = imageSrc?.replace("data:image/jpeg;base64,", "");
+
 
 		try {
+			const imageSrc = imgRef.current?.src;
+		const imgBase64 = imageSrc?.replace("data:image/jpeg;base64,", "");
+			const collectionID = process.env.NEXT_PUBLIC_AWS_COLLECTION_ID;
+
 			const res = await fetch("/api/face/search", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ collectionID: "testing-aws", imgBase64 }),
+				body: JSON.stringify({ collectionID, imgBase64 }),
 			});
+			const response = await res.json();
 
-			console.log(res);
+			if (response.success === true) {
+				//get the imageIdOfThe recognised face
+				const externalImgId = response.data.Face.ExternalImageId;
+				//navigate to payment page
+				router.push(`/pay/${externalImgId}`);
+			} else {
+				console.log("fail");
+			}
 		} catch (error: any) {
 			setError(error.message);
 			console.error(error);
@@ -104,7 +106,7 @@ const Camera = ({ operation, name, phoneNumber }: Props) => {
 
 	useEffect(() => {
 		loadModels();
-	}, []);
+	}, [imgRef, camRef]);
 
 	useEffect(() => {
 		//using faceapi model to detect if there is face in the frame
@@ -156,7 +158,7 @@ const Camera = ({ operation, name, phoneNumber }: Props) => {
 				width={1280}
 				videoConstraints={videoConstraints}
 			/>
-			<img className='hidden' src='' alt='' ref={imgRef} />
+			<img className='hidden' src='/' alt='' ref={imgRef} />
 			{/* <button onClick={detectFace}> detect </button> */}
 		</div>
 	);
