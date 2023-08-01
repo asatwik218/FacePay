@@ -1,6 +1,6 @@
 "use client";
 import { RecaptchaVerifier, User, signInWithPhoneNumber } from "@firebase/auth";
-import React, { use, useState } from "react";
+import React, { useState } from "react";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input/input";
 import OtpInput from "react-otp-input";
 
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { auth, db } from "@/lib/firebase";
 import { UserType, useUserStore } from "@/lib/userStore";
 import { useRouter } from "next/navigation";
-import { collection, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 function PhoneAuth() {
 	const [phoneNumber, setPhoneNumber] = useState<string>();
@@ -21,46 +21,43 @@ function PhoneAuth() {
 
 	const router = useRouter();
 
-	//user global state
 	const { user, setUser } = useUserStore();
-	console.log(user);
 
 	//google phone login captcha verification
 	const onCapthaVerify = () => {
-		if (!window.recaptchaVerifier) {
-			window.recaptchaVerifier = new RecaptchaVerifier(
-				auth,
-				"recaptha-verifier",
-				{
-					size: "invisible",
-					callback: (response: any) => {
-						// reCAPTCHA solved, allow signInWithPhoneNumber.
-						sendOTP();
-					},
-					"expired-callback": () => {},
-				}
-			);
+		try {
+			if (!window.recaptchaVerifier) {
+				window.recaptchaVerifier = new RecaptchaVerifier(
+					auth,
+					"recaptha-verifier",
+					{
+						size: "invisible",
+						callback: (response: any) => {
+							// reCAPTCHA solved, allow signInWithPhoneNumber.
+							sendOTP();
+						},
+						"expired-callback": () => {},
+					}
+				);
+			}
+		} catch (error: any) {
+			console.log("captcha validation error", error.message);
 		}
-	};
-
-	//what to do on signup/new user
-	const onSignup = (phNo: string) => {
-		const userDetails: UserType = { ...user, phoneNumber: phNo! };
-		setUser(userDetails);
-		router.replace("/signup/2");
 	};
 
 	const verifyOtp = async () => {
 		setIsLoading(true);
 		try {
 			//confirm otp
-			const res = await window.confirmationResult.confirm(otp);
-			const phNo = res.user.phoneNumber;
-			
+			await window.confirmationResult.confirm(otp);
 
-
-			onSignup(res.user.phoneNumber!);
+			if (isNewUser) {
+				router.replace("/signup/2");
+			} else {
+				router.replace("/");
+			}
 		} catch (error: any) {
+			//if invalid/wrong OTP
 			console.log("error in verifying otp", error);
 			setError(error.message);
 		} finally {
@@ -73,15 +70,27 @@ function PhoneAuth() {
 		setError("");
 
 		try {
-			//query database for user with phone number
-
-			//setIsNewUser(false);
-
-			//if user does not exist, create user and send otp
-			// setIsNewUser(true);
-
-			//send otp
 			if (phoneNumber && isValidPhoneNumber(phoneNumber)) {
+				//query database for user with phone number
+				const userQuery = query(
+					collection(db, "users"),
+					where("phoneNumber", "==", phoneNumber)
+				);
+				const userDetails = (await getDocs(userQuery)).docs.map((doc) => ({
+					...doc.data(),
+				}))[0] as UserType;
+
+				//if user already exists , do not signup instead login
+				if (userDetails) {
+					setUser(userDetails);
+					setIsNewUser(false);
+				} else {
+					setIsNewUser(true);
+					setUser({ ...user, phoneNumber });
+				}
+				console.log(user);
+
+				//invisible captcha verify and send otp
 				onCapthaVerify();
 				const appVerifier = window.recaptchaVerifier;
 				const confirmationResult = await signInWithPhoneNumber(
@@ -96,6 +105,8 @@ function PhoneAuth() {
 		} catch (error: any) {
 			console.log("error in sending otp", error.message);
 			setError(error.message);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -103,7 +114,7 @@ function PhoneAuth() {
 		<div className='flex flex-col border w-full gap-2 rounded-sm border-gray-700 p-5 m-5'>
 			{OTPsent ? (
 				<>
-					<h4>Otp sent at +91 {phoneNumber}</h4>
+					<h4>Otp sent at {user.phoneNumber}</h4>
 					<OtpInput
 						value={otp}
 						onChange={setOtp}

@@ -75,10 +75,9 @@ const Camera = ({ operation }: Props) => {
 	const handlePayment = async () => {
 		setError("");
 
-
 		try {
 			const imageSrc = imgRef.current?.src;
-		const imgBase64 = imageSrc?.replace("data:image/jpeg;base64,", "");
+			const imgBase64 = imageSrc?.replace("data:image/jpeg;base64,", "");
 			const collectionID = process.env.NEXT_PUBLIC_AWS_COLLECTION_ID;
 
 			const res = await fetch("/api/face/search", {
@@ -143,6 +142,11 @@ const Camera = ({ operation }: Props) => {
 		return () => clearInterval(intervalId);
 	}, [imgRef, camRef]);
 
+	// const videoConstraints = {
+	// 	width: 1280,
+	// 	height: 720,
+	// 	facingMode: { exact: operation === "pay" ? "enviroment" : "user" },
+	// };
 	const videoConstraints = {
 		width: 1280,
 		height: 720,

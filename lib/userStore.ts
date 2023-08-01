@@ -14,18 +14,15 @@ export type UserType = {
 	upiID: string;
 };
 
-type UserStoreType = {
+type userStore = {
 	user: UserType;
 	setUser: (userDetails: UserType) => void;
-	reset: () => void;
+	resetUser: () => void;
 };
 
-export const useUserStore = create<UserStoreType>((set) => ({
+export const useUserStore = create<userStore>((set) => ({
 	user: initialState,
-	setUser: (userDetails: UserType) => {
-		set(() => ({ user: { ...userDetails } }));
-	},
-	reset: () => {
-		set(() => ({ user: initialState }));
-	},
+	setUser: (userDetails: UserType) => set({ user: { ...userDetails } }),
+	resetUser:() => set({ user: initialState })
 }));
+

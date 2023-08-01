@@ -13,7 +13,8 @@ type Props = {};
 const PaymentPage = ({ params: { id } }: { params: { id: string } }) => {
 	const router = useRouter();
 	const [amt, setAmt] = useState("");
-	const [user,setUser] = useState<UserType|null>(null)
+	// const [user,setUser] = useState<UserType|null>(null)
+	const {user, setUser} = useUserStore();
 	const getUserData = async () => {
 		try {
 			console.log(id);
@@ -34,6 +35,7 @@ const PaymentPage = ({ params: { id } }: { params: { id: string } }) => {
 
 			setUser(userDetails)
 			console.log(user);
+			
 		} catch (error: any) {
 			console.log(error.message);
 		}
