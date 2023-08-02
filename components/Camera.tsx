@@ -148,23 +148,26 @@ const Camera = ({ operation }: Props) => {
 	// 	facingMode: { exact: operation === "pay" ? "enviroment" : "user" },
 	// };
 	const videoConstraints = {
-		width: 1280,
-		height: 720,
+		width: window.innerWidth,
+		height: window.innerHeight,
 		facingMode: "user",
 	};
 	return (
-		<div>
-			<Webcam
-				ref={camRef}
-				audio={false}
-				height={720}
-				screenshotFormat='image/jpeg'
-				width={1280}
-				videoConstraints={videoConstraints}
-			/>
-			<img className='hidden' src='/' alt='' ref={imgRef} />
-			{/* <button onClick={detectFace}> detect </button> */}
-		</div>
+		<>
+			<div className=' h-screen w-screen m-0 p-0 relative'>
+				<Webcam
+					ref={camRef}
+					audio={false}
+					screenshotFormat='image/jpeg'
+					videoConstraints={videoConstraints}
+					className='h-screen w-screen object-contain'
+				/>
+				<img className='hidden' src='/' alt='' ref={imgRef} />
+				{/* <button onClick={detectFace}> detect </button> */}
+			</div>
+			<div className="absolute border-4 border-white z-10" id="camera-overlay">
+			</div>
+		</>
 	);
 };
 

@@ -3,12 +3,15 @@ import { RecaptchaVerifier, User, signInWithPhoneNumber } from "@firebase/auth";
 import React, { useState } from "react";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input/input";
 import OtpInput from "react-otp-input";
+import { BsPhone } from "react-icons/bs";
+import { BiLoaderAlt } from "react-icons/bi";
 
 import { Button } from "@/components/ui/button";
 import { auth, db } from "@/lib/firebase";
 import { UserType, useUserStore } from "@/lib/userStore";
 import { useRouter } from "next/navigation";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import Image from "next/image";
 
 function PhoneAuth() {
 	const [phoneNumber, setPhoneNumber] = useState<string>();
@@ -36,7 +39,10 @@ function PhoneAuth() {
 							// reCAPTCHA solved, allow signInWithPhoneNumber.
 							sendOTP();
 						},
-						"expired-callback": () => {},
+						"expired-callback": () => {
+							// Response expired. Ask user to solve reCAPTCHA again.
+							onCapthaVerify();
+						},
 					}
 				);
 			}
@@ -111,38 +117,87 @@ function PhoneAuth() {
 	};
 
 	return (
-		<div className='flex flex-col border w-full gap-2 rounded-sm border-gray-700 p-5 m-5'>
-			{OTPsent ? (
-				<>
-					<h4>Otp sent at {user.phoneNumber}</h4>
-					<OtpInput
-						value={otp}
-						onChange={setOtp}
-						numInputs={6}
-						renderInput={(props) => <input {...props} />}
-						containerStyle='w-full flex justify-center items-end space-x-2'
-						inputStyle={
-							"w-12 h-12 border-2 text-center rounded bg-transparent outline-none border-gray-400 focus:border-gray-700 focus:text-gray-700 text-gray-400 "
-						}
-					/>
-					<Button onClick={verifyOtp}>Verify</Button>
-				</>
-			) : (
-				<>
-					<div id='recaptha-verifier'></div>
-					<div id='recaptha-verifier'></div>
-					<label htmlFor=''>Enter phone Number</label>
-					<PhoneInput
-						className='border-2'
-						country='IN'
-						placeholder='xxxxxxxxxx'
-						value={phoneNumber}
-						onChange={setPhoneNumber}
-					/>
-					<Button onClick={sendOTP}>Send OTP</Button>
-					<p>{error}</p>
-				</>
-			)}
+		<div className='flex  flex-col mx-6 my-8'>
+			<Image
+				src='/assets/face-id.jpg'
+				alt='signup-illustration'
+				className='m-auto'
+				width={300}
+				height={300}
+			/>
+			<h2 className='text-6xl font-extrabold text-blue-800 my-2'>Hey,</h2>
+			<div className=''>
+				<div id='recaptha-verifier'></div>
+				{OTPsent ? (
+					<>
+						<div className='my-7 flex flex-col gap-y-5 items-center'>
+							<h4 className='text-xl'>
+								OTP sent at{" "}
+								<span className='text-blue-800'>{user.phoneNumber}</span>
+							</h4>
+							<OtpInput
+								value={otp}
+								onChange={setOtp}
+								numInputs={6}
+								renderInput={(props) => <input {...props} />}
+								containerStyle='w-full flex justify-center space-x-3 '
+								inputStyle='border-2 border-gray-400 rounded-lg text-xl text-center focus:outline-none focus:border-blue-800'
+							/>
+							<button
+								onClick={verifyOtp}
+								disabled={isLoading}
+								className='bg-blue-800 w-full p-3 justify-center rounded-lg flex gap-x-2 items-center text-white text-center text-lg font-semibold tracking-wider active:bg-blue-500'
+							>
+								{isLoading && (
+									<BiLoaderAlt className=' animate-spin w-6 h-6 font-bold' />
+								)}
+								{isNewUser ? "Sign Up" : "Login"}
+							</button>
+							<div className='flex w-full justify-end'>
+								<p className='font-semibold text-gray-600'>
+									Not Your Number?
+									<span
+										className='font-bold mx-1 text-blue-800 active:text-blue-800'
+										onClick={() => {
+											setOTPSent(false);
+										}}
+									>
+										Go Back{" "}
+									</span>
+								</p>
+							</div>
+						</div>
+					</>
+				) : (
+					<>
+						<div className='text-xl  mt-5 mb-1  text-gray-500'>
+							Phone Number
+						</div>
+						<div className='flex items-center  gap-x-2 mb-5 p-3 border-2 rounded-lg  border-gray-400 focus-within:border-blue-800 focus-within:border-2 text-gray-400 focus-within:text-blue-800'>
+							<BsPhone className='w-7 h-7 mr-1 ' />
+							<PhoneInput
+								className='focus:outline-none text-xl peer '
+								country='IN'
+								placeholder='2112900999'
+								value={phoneNumber}
+								onChange={setPhoneNumber}
+								required
+							/>
+						</div>
+						<button
+							onClick={sendOTP}
+							disabled={isLoading}
+							className='bg-blue-800 w-full p-3 justify-center rounded-lg flex gap-x-2 items-center text-white text-center text-lg font-semibold tracking-wider active:bg-blue-500'
+						>
+							{isLoading && (
+								<BiLoaderAlt className=' animate-spin w-6 h-6 font-bold' />
+							)}
+							SEND OTP
+						</button>
+						<p>{error}</p>
+					</>
+				)}
+			</div>
 		</div>
 	);
 }
