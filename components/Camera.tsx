@@ -150,7 +150,7 @@ const Camera = ({ operation }: Props) => {
 		videoConstraints = {
 			width: 1280,
 			height: 720,
-			facingMode: { exact: operation === "pay" ? "enviroment" : "user" },
+			facingMode: { exact: operation === "pay" ? "environment" : "user" },
 		}
 	} else {
 	 videoConstraints = {
