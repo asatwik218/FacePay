@@ -1,9 +1,12 @@
 'use client'
-import Camera from '@/components/Camera';
+
+
 import { useUserStore } from '@/lib/userStore'
 import { useRouter } from 'next/navigation';
+import dynamic from "next/dynamic"; 
 import React, { useEffect } from 'react'
 
+const Camera = dynamic(() => import("@/components/Camera"), { ssr: false });
 type Props = {}
 
 const SignupStep3 = () => {
