@@ -6,6 +6,7 @@ import { useUserStore } from "@/lib/userStore";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
+import { isMobile } from "react-device-detect";
 
 type Props = {
 	operation: "signup" | "pay";
@@ -62,6 +63,8 @@ const Camera = ({ operation }: Props) => {
 					externalImgId,
 				});
 				console.log(doc);
+
+				localStorage.setItem("isAuthenticated", "true");
 				//redirect to main page
 				router.push("/");
 			} else {
@@ -141,17 +144,27 @@ const Camera = ({ operation }: Props) => {
 		const intervalId = setInterval(detectFace, 500);
 		return () => clearInterval(intervalId);
 	}, [imgRef, camRef]);
-
-	// const videoConstraints = {
-	// 	width: 1280,
-	// 	height: 720,
-	// 	facingMode: { exact: operation === "pay" ? "enviroment" : "user" },
-	// };
-	const videoConstraints = {
+	let videoConstraints;
+	if (isMobile) {
+		console.log("mobile")
+		videoConstraints = {
+			width: 1280,
+			height: 720,
+			facingMode: { exact: operation === "pay" ? "enviroment" : "user" },
+		}
+	} else {
+	 videoConstraints = {
 		width: window.innerWidth,
 		height: window.innerHeight,
-		facingMode: "user",
+		facingMode: { exact: "user" },
 	};
+	}
+	// const videoConstraints = {
+	// 	width: window.innerWidth,
+	// 	height: window.innerHeight,
+	// 	facingMode: "user",
+	// };
+
 	return (
 		<>
 			<div className=' h-screen w-screen m-0 p-0 relative'>
@@ -162,11 +175,12 @@ const Camera = ({ operation }: Props) => {
 					videoConstraints={videoConstraints}
 					className='h-screen w-screen object-contain'
 				/>
-				<img className='hidden' src='/' alt='' ref={imgRef} />
-				{/* <button onClick={detectFace}> detect </button> */}
+				<img className='hidden' src='' alt='' ref={imgRef} />
 			</div>
-			<div className="absolute border-4 border-white z-10" id="camera-overlay">
-			</div>
+			<div
+				className='absolute border-4 border-white z-10'
+				id='camera-overlay'
+			></div>
 		</>
 	);
 };

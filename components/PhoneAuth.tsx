@@ -60,6 +60,9 @@ function PhoneAuth() {
 			if (isNewUser) {
 				router.replace("/signup/2");
 			} else {
+				if (!localStorage.getItem("isAuthenticated")) {
+					localStorage.setItem("isAuthenticated", "true");
+				}
 				router.replace("/");
 			}
 		} catch (error: any) {
