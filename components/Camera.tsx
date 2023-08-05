@@ -194,6 +194,7 @@ const Camera = ({ operation }: Props) => {
 				className='absolute border-4 border-white z-10'
 				id='camera-overlay'
 			></div>
+			<div>{error}</div>
 		</>
 	);
 };
