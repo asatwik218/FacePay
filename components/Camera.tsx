@@ -148,8 +148,8 @@ const Camera = ({ operation }: Props) => {
 	if (isMobile) {
 		console.log("mobile")
 		videoConstraints = {
-			width: 1280,
-			height: 720,
+			width: window.innerWidth,
+			height: window.innerHeight,
 			facingMode: { exact: operation === "pay" ? "environment" : "user" },
 		}
 	} else {
