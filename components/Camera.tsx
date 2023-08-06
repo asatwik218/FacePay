@@ -54,7 +54,7 @@ const Camera = ({ operation }: Props) => {
 			});
 			const response = await res.json();
 
-			console.log(response);
+			console.log(response.success);
 
 			if (response.success == true) {
 				//save user data to db
@@ -68,6 +68,7 @@ const Camera = ({ operation }: Props) => {
 				//redirect to main page
 				router.push("/");
 			} else {
+					console.log(response.error);
 				setError(response.error);
 			}
 		} catch (error: any) {
