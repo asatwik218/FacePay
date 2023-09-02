@@ -6,7 +6,6 @@ import { useUserStore } from "@/lib/userStore";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
-import { isMobile } from "react-device-detect";
 
 type Props = {
 	operation: "signup" | "pay";
@@ -146,20 +145,6 @@ const Camera = ({ operation }: Props) => {
 		return () => clearInterval(intervalId);
 	}, [imgRef, camRef]);
 	let videoConstraints;
-	// if (isMobile) {
-	// 	console.log("mobile")
-	// 	videoConstraints = {
-	// 		width: window.innerWidth,
-	// 		height: window.innerHeight,
-	// 		facingMode: { exact: operation === "pay" ? "environment" : "user" },
-	// 	}
-	// } else {
-	//  videoConstraints = {
-	// 	width: window.innerWidth,
-	// 	height: window.innerHeight,
-	// 	facingMode: { exact: "user" },
-	// };
-	// }
 	if (process.env.NEXT_PUBLIC_TEST === "1") {
 		videoConstraints = {
 			width: window.innerWidth,
@@ -173,11 +158,6 @@ const Camera = ({ operation }: Props) => {
 			facingMode: operation === "pay" ? "environment" : "user",
 		};
 	}
-	// const videoConstraints = {
-	// 	width: window.innerWidth,
-	// 	height: window.innerHeight,
-	// 	facingMode: "user",
-	// };
 
 	return (
 		<>
