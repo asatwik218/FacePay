@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
 			FaceRecords: res.FaceRecords![0],
 		});
 	} catch (error: any) {
+		console.log(error);
 		return NextResponse.json({ error: error.message });
 	}
 }

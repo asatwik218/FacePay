@@ -54,7 +54,7 @@ const Camera = ({ operation }: Props) => {
 			});
 			const response = await res.json();
 
-			console.log(response);
+			console.log(response.success);
 
 			if (response.success == true) {
 				//save user data to db
@@ -68,6 +68,7 @@ const Camera = ({ operation }: Props) => {
 				//redirect to main page
 				router.push("/");
 			} else {
+					console.log(response.error);
 				setError(response.error);
 			}
 		} catch (error: any) {
@@ -145,19 +146,32 @@ const Camera = ({ operation }: Props) => {
 		return () => clearInterval(intervalId);
 	}, [imgRef, camRef]);
 	let videoConstraints;
-	if (isMobile) {
-		console.log("mobile")
+	// if (isMobile) {
+	// 	console.log("mobile")
+	// 	videoConstraints = {
+	// 		width: window.innerWidth,
+	// 		height: window.innerHeight,
+	// 		facingMode: { exact: operation === "pay" ? "environment" : "user" },
+	// 	}
+	// } else {
+	//  videoConstraints = {
+	// 	width: window.innerWidth,
+	// 	height: window.innerHeight,
+	// 	facingMode: { exact: "user" },
+	// };
+	// }
+	if (process.env.NEXT_PUBLIC_TEST === "1") {
 		videoConstraints = {
-			width: 1280,
-			height: 720,
-			facingMode: { exact: operation === "pay" ? "environment" : "user" },
-		}
+			width: window.innerWidth,
+			height: window.innerHeight,
+			facingMode: "user",
+		};
 	} else {
-	 videoConstraints = {
-		width: window.innerWidth,
-		height: window.innerHeight,
-		facingMode: { exact: "user" },
-	};
+		videoConstraints = {
+			width: window.innerWidth,
+			height: window.innerHeight,
+			facingMode: operation === "pay" ? "environment" : "user",
+		};
 	}
 	// const videoConstraints = {
 	// 	width: window.innerWidth,
@@ -181,6 +195,7 @@ const Camera = ({ operation }: Props) => {
 				className='absolute border-4 border-white z-10'
 				id='camera-overlay'
 			></div>
+			<div>{error}</div>
 		</>
 	);
 };

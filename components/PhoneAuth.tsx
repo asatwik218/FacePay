@@ -41,7 +41,7 @@ function PhoneAuth() {
 						},
 						"expired-callback": () => {
 							// Response expired. Ask user to solve reCAPTCHA again.
-							onCapthaVerify();
+							// onCapthaVerify();
 						},
 					}
 				);
